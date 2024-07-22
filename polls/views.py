@@ -2,7 +2,7 @@ from rest_framework import viewsets, generics
 from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth.models import User
-from .models import Poll, Option, Vote
+from .models import Poll, Vote
 from .serializers import PollSerializer, VoteSerializer, RegisterSerializer, CustomTokenObtainPairSerializer
 
 class PollViewSet(viewsets.ModelViewSet):
