@@ -4,9 +4,9 @@ from celery import Celery
 from celery.schedules import crontab
 
 # Set the default Django settings module for the 'celery' program.
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'your_project.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'swayola_api.settings')
 
-app = Celery('your_project')
+app = Celery('swayola_api')
 
 # Using a string here means the worker will not have to pickle the object when using Windows.
 app.config_from_object('django.conf:settings', namespace='CELERY')
@@ -17,7 +17,7 @@ app.autodiscover_tasks()
 # Configure the cronjob schedule
 app.conf.beat_schedule = {
     'write-vote-counts-to-db-every-minute': {
-        'task': 'your_app.tasks.write_vote_counts_to_db',
+        'task': 'swayola_api.tasks.write_vote_counts_to_db',
         'schedule': crontab(minute='*/1'),  # Change as per your requirement
     },
     # TODO: Run a greater vote count / sync cron job every week or so
