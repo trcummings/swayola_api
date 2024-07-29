@@ -10,19 +10,39 @@ from .utils import validate_email
 class OptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Option
-        fields = '__all__'
+        fields = ['id', 'text', 'vote_count']
 
 class PollSerializer(serializers.ModelSerializer):
     options = OptionSerializer(many=True)
 
     class Meta:
         model = Poll
-        fields = '__all__'
+        fields = ['id', 'title', 'created_by', 'created_at', 'vote_count', 'options']
+        read_only_fields = ['created_by', 'created_at', 'vote_count']
+
+    # Make sure polls can only have 4 options max and a minimum of 2
+    def validate_options(self, value):
+        if len(value) < 2:
+            raise serializers.ValidationError("A poll must have at least 2 options.")
+        if len(value) > 4:
+            raise serializers.ValidationError("A poll can have a maximum of 4 options.")
+        return value
+    
+
+    def create(self, validated_data):
+        # Grab the options data from the validated options so we don't pass through extra junk
+        options_data = validated_data.pop('options')
+        poll = Poll.objects.create(**validated_data)
+        for option_data in options_data:
+            Option.objects.create(poll=poll, **option_data)
+        return poll
+
 
 class VoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Vote
-        fields = '__all__'
+        fields = ['id', 'poll', 'option', 'voted_by', 'created_at']
+        read_only_fields = ['voted_by', 'created_at']
 
 # User registration
 class RegisterSerializer(serializers.ModelSerializer):
