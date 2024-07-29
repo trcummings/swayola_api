@@ -3,8 +3,10 @@ from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth.models import User
+from django.core.cache import cache
 from .models import Poll, Vote
 from .serializers import PollSerializer, VoteSerializer, RegisterSerializer, CustomTokenObtainPairSerializer
+from .tasks import increment_vote_count
 
 # region Polls
 class PollListView(generics.ListAPIView):
@@ -39,7 +41,18 @@ class VoteCreateView(generics.CreateAPIView):
         poll = serializer.validated_data['poll']
         if poll.created_by == self.request.user:
             raise PermissionDenied("You cannot vote on your own poll.")
-        serializer.save(voted_by=self.request.user)
+        
+        # Create the vote
+        vote = serializer.save(voted_by=self.request.user)
+
+        # Add the vote to the task
+        increment_vote_count.delay(vote.poll.id, vote.option.id)
+        
+        # Update the vote count for that poll in the cache
+        poll_key = f'poll_{vote.poll.id}_vote_count'
+        cache.incr(poll_key)
+
+
 # endregion
 
 # region Registration
