@@ -1,10 +1,12 @@
-from rest_framework import generics, permissions
+from rest_framework import generics, permissions, viewsets
+from rest_framework.request import Request
+from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from .models import Poll, Vote
-from .serializers import PollSerializer, VoteSerializer, RegisterSerializer, CustomTokenObtainPairSerializer
+from .serializers import PollSerializer, VoteSerializer, RegisterSerializer, CustomTokenObtainPairSerializer, UserSerializer
 from .tasks import increment_vote_count
 
 # region Polls
@@ -53,11 +55,17 @@ class VoteCreateView(generics.CreateAPIView):
         # Update the vote count for that poll in the cache
         poll_key = f'poll_{vote.poll.id}_vote_count'
         cache.incr(poll_key)
-
-
 # endregion
 
-# region Registration
+# region Users / Registration
+class UserViewSet(generics.RetrieveAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        serializer = UserSerializer(user)
+        return Response(serializer.data)
+
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     permission_classes = (permissions.AllowAny,)

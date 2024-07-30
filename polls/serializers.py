@@ -45,6 +45,11 @@ class VoteSerializer(serializers.ModelSerializer):
         read_only_fields = ['voted_by', 'created_at']
 
 # User registration
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id', 'username', 'email')
+
 class RegisterSerializer(serializers.ModelSerializer):
     # Validate password
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])

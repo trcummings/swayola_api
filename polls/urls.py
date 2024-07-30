@@ -1,6 +1,6 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
-from .views import PollListView, PollCreateView, PollDetailView, VoteCreateView, RegisterView, CustomTokenObtainPairView
+from .views import PollListView, PollCreateView, PollDetailView, VoteCreateView, RegisterView, CustomTokenObtainPairView, UserViewSet
 
 urlpatterns = [
     # User registration / routing
@@ -12,4 +12,6 @@ urlpatterns = [
     path('polls/<int:pk>', PollDetailView.as_view(), name='poll_detail'),
     path('polls/create', PollCreateView.as_view(), name='poll_create'),
     path('votes', VoteCreateView.as_view(), name='vote_create'),
+    # Users
+    path('users/me', UserViewSet.as_view(), name="current_user")
 ]
