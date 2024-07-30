@@ -1,6 +1,5 @@
 from rest_framework import generics, permissions
 from rest_framework.exceptions import PermissionDenied
-from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth.models import User
 from django.core.cache import cache
@@ -38,7 +37,10 @@ class VoteCreateView(generics.CreateAPIView):
 
     # Ensure we can't vote on a poll that we created
     def perform_create(self, serializer):
+        # Pull the poll from validated data
         poll = serializer.validated_data['poll']
+
+        # Reject creation if we're voting on our on poll
         if poll.created_by == self.request.user:
             raise PermissionDenied("You cannot vote on your own poll.")
         
@@ -46,8 +48,8 @@ class VoteCreateView(generics.CreateAPIView):
         vote = serializer.save(voted_by=self.request.user)
 
         # Add the vote to the task
-        increment_vote_count.delay(vote.poll.id, vote.option.id)
-        
+        increment_vote_count.delay_on_commit(vote.poll.id, vote.option.id)            
+
         # Update the vote count for that poll in the cache
         poll_key = f'poll_{vote.poll.id}_vote_count'
         cache.incr(poll_key)
@@ -58,7 +60,7 @@ class VoteCreateView(generics.CreateAPIView):
 # region Registration
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
-    permission_classes = (AllowAny,)
+    permission_classes = (permissions.AllowAny,)
     serializer_class = RegisterSerializer
 
     # Pull the IP address out of the request meta if possible

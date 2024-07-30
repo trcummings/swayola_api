@@ -16,6 +16,7 @@ def increment_vote_count(poll_id, option_id):
 def write_vote_counts_to_db():
     # Grab all polls with options prefetched
     polls = Poll.objects.prefetch_related('options').all()
+
     # Itereate over each poll and update the vote count and option vote counts
     for poll in polls:
         poll_key = f'poll_{poll.id}_vote_count'
