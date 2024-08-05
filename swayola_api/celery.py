@@ -2,6 +2,7 @@ from __future__ import absolute_import, unicode_literals
 import os
 from celery import Celery
 from celery.schedules import crontab
+from celery.signals import setup_logging  # noqa
 
 # Set the default Django settings module for the 'celery' program.
 # Unnecessary, but saves us having to always pass in the settings
@@ -12,6 +13,14 @@ app = Celery('swayola_api')
 
 # Configure celery from the django settings module
 app.config_from_object('django.conf:settings', namespace='CELERY')
+
+# Set up logging for celery
+@setup_logging.connect
+def config_loggers(*args, **kwargs):
+    from logging.config import dictConfig  # noqa
+    from django.conf import settings  # noqa
+
+    dictConfig(settings.LOGGING)
 
 # Discover tasks set up in separate tasks.py modules
 app.autodiscover_tasks()
