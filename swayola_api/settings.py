@@ -75,7 +75,7 @@ REST_FRAMEWORK = {
 
 SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=10),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
@@ -92,7 +92,8 @@ CORS_ALLOW_ALL_ORIGINS = is_development_env
 # Defined origins
 CORS_ALLOWED_ORIGINS = [
     # TODO: Add frontend URL
-    'http://localhost:3000'
+    'http://localhost:3000',
+    'http://localhost:5173'
 ]
 
 ROOT_URLCONF = 'swayola_api.urls'

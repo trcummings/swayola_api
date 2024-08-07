@@ -33,12 +33,12 @@ class Option(models.Model):
 class Vote(models.Model):
     poll = models.ForeignKey(Poll, related_name='votes', on_delete=models.CASCADE)
     option = models.ForeignKey(Option, related_name='votes', on_delete=models.CASCADE)
-    voted_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
     # For now, only one vote per poll
     class Meta:
-        unique_together = ('poll', 'voted_by')
+        unique_together = ('poll', 'user')
 
     def __str__(self):
         return self.poll + " " + self.option
